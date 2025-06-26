@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Préstamos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Sistema de Gestión de Préstamos</h1>
+    </header>
+
+    <main>
+        <section class="form-container">
+            <h2>Nuevo Préstamo</h2>
+            <form id="prestamo-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="fecha">Fecha*</label>
+                        <input type="date" id="fecha" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nombre">Nombre (Buscar por aquí)*</label>
+                        <input type="text" id="nombre" required list="user-list">
+                        <datalist id="user-list"></datalist>
+                    </div>
+                    <div class="form-group">
+                        <label for="identificacion">Identificación*</label>
+                        <input type="text" id="identificacion" required readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="area">Área</label>
+                        <input type="text" id="area" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="ubicacion">Ubicación*</label>
+                        <select id="ubicacion" required></select>
+                    </div>
+                     <div class="form-group">
+                        <label for="edificio">Edificio</label>
+                        <input type="text" id="edificio" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="hora_inicio">Hora Inicio*</label>
+                        <input type="time" id="hora_inicio" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="prestado_por">Prestado por*</label>
+                        <select id="prestado_por" required></select>
+                    </div>
+                </div>
+
+                <fieldset class="checkbox-group">
+                    <legend>Equipos Solicitados</legend>
+                    <div class="check-item">
+                        <label><input type="checkbox" name="equipos" id="pc"> PC</label>
+                        <div class="form-group hidden" id="pc-numero-group">
+                            <label for="pc_numero" class="sr-only">Nº PC</label>
+                            <select id="pc_numero"></select>
+                        </div>
+                    </div>
+                    <label><input type="checkbox" name="equipos" id="kit"> Kit</label>
+                    <label><input type="checkbox" name="equipos" id="aire"> Aire</label>
+                    <label><input type="checkbox" name="equipos" id="cabinas"> Cabinas</label>
+                    <label><input type="checkbox" name="equipos" id="consola"> Consola</label>
+                    <label><input type="checkbox" name="equipos" id="vbeam"> VBeam</label>
+                </fieldset>
+
+                <div class="form-group full-width">
+                    <label for="observaciones">Observaciones</label>
+                    <textarea id="observaciones" rows="3"></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit">Guardar Préstamo</button>
+                    <button type="button" id="clear-form">Limpiar</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="table-container">
+            <h2>Registros Pendientes de Devolución</h2>
+            <div class="controls-bar">
+                <input type="text" id="search-input" placeholder="Buscar en la tabla...">
+                <div class="export-buttons">
+                    <a href="/export/excel" class="btn-export">Exportar Historial (Excel)</a>
+                    <a href="/export/pdf" class="btn-export">Exportar Historial (PDF)</a>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table id="registros-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Fecha</th>
+                            <th>Nombre</th>
+                            <th>Ubicación</th>
+                            <th>Hora Inicio</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Las filas se insertarán aquí con JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal para Devoluciones -->
+    <div id="devolucion-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Registrar Devolución</h3>
+            <p>Seleccione quién recibe el equipo.</p>
+            <div class="form-group">
+                <label for="modal-recibido-por">Recibido por*</label>
+                <select id="modal-recibido-por" required></select>
+            </div>
+            <div class="modal-actions">
+                <button id="modal-btn-cancelar" class="btn-secondary">Cancelar</button>
+                <button id="modal-btn-confirmar" class="btn-primary">Confirmar Devolución</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
