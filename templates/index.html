@@ -4,123 +4,149 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Gestión de Préstamos</title>
+
+    <!-- Tipografía Profesional: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Iconos Modernos: Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web@2.0.3"></script>
+
+    <!-- Nuestro CSS Rediseñado -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <header>
-        <h1>Sistema de Gestión de Préstamos</h1>
-    </header>
+    <div class="container">
+        <header class="main-header">
+            <i class="ph-bold ph-stack"></i>
+            <h1>Sistema de Gestión de Préstamos</h1>
+        </header>
 
-    <main>
-        <section class="form-container">
-            <h2>Nuevo Préstamo</h2>
-            <form id="prestamo-form">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="fecha">Fecha*</label>
-                        <input type="date" id="fecha" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="nombre">Nombre (Buscar por aquí)*</label>
-                        <input type="text" id="nombre" required list="user-list">
-                        <datalist id="user-list"></datalist>
-                    </div>
-                    <div class="form-group">
-                        <label for="identificacion">Identificación*</label>
-                        <input type="text" id="identificacion" required readonly>
-                    </div>
-                    <div class="form-group">
-                        <label for="area">Área</label>
-                        <input type="text" id="area" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label for="ubicacion">Ubicación*</label>
-                        <select id="ubicacion" required></select>
-                    </div>
-                     <div class="form-group">
-                        <label for="edificio">Edificio</label>
-                        <input type="text" id="edificio" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label for="hora_inicio">Hora Inicio*</label>
-                        <input type="time" id="hora_inicio" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="prestado_por">Prestado por*</label>
-                        <select id="prestado_por" required></select>
-                    </div>
+        <main>
+            <section class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Nuevo Préstamo</h2>
                 </div>
+                <div class="card-body">
+                    <form id="prestamo-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="fecha">Fecha</label>
+                                <input type="date" id="fecha" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="nombre">Nombre (Buscar)</label>
+                                <input type="text" id="nombre" required list="user-list" placeholder="Escriba para buscar...">
+                                <datalist id="user-list"></datalist>
+                            </div>
+                            <div class="form-group">
+                                <label for="identificacion">Identificación</label>
+                                <input type="text" id="identificacion" required readonly placeholder="Autocompletado">
+                            </div>
+                            <div class="form-group">
+                                <label for="area">Área</label>
+                                <input type="text" id="area" readonly placeholder="Autocompletado">
+                            </div>
+                            <div class="form-group">
+                                <label for="ubicacion">Ubicación</label>
+                                <select id="ubicacion" required></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="edificio">Edificio</label>
+                                <input type="text" id="edificio" readonly placeholder="Autocompletado">
+                            </div>
+                            <div class="form-group">
+                                <label for="hora_inicio">Hora Inicio</label>
+                                <input type="time" id="hora_inicio" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="prestado_por">Prestado por</label>
+                                <select id="prestado_por" required></select>
+                            </div>
+                        </div>
 
-                <fieldset class="checkbox-group">
-                    <legend>Equipos Solicitados</legend>
-                    <div class="check-item">
-                        <label><input type="checkbox" name="equipos" id="pc"> PC</label>
-                        <div class="form-group hidden" id="pc-numero-group">
-                            <label for="pc_numero" class="sr-only">Nº PC</label>
-                            <select id="pc_numero"></select>
+                        <fieldset class="form-fieldset">
+                            <legend>Equipos Solicitados</legend>
+                            <div class="checkbox-group">
+                                <div class="check-item">
+                                    <label><input type="checkbox" id="pc"> PC</label>
+                                    <div class="hidden" id="pc-numero-group">
+                                        <select id="pc_numero" class="input-inline"></select>
+                                    </div>
+                                </div>
+                                <label><input type="checkbox" id="kit"> Kit</label>
+                                <label><input type="checkbox" id="aire"> Aire</label>
+                                <label><input type="checkbox" id="cabinas"> Cabinas</label>
+                                <label><input type="checkbox" id="consola"> Consola</label>
+                                <label><input type="checkbox" id="vbeam"> VBeam</label>
+                            </div>
+                        </fieldset>
+
+                        <div class="form-group">
+                            <label for="observaciones">Observaciones</label>
+                            <textarea id="observaciones" rows="3" placeholder="Añadir notas adicionales..."></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn--primary"><i class="ph ph-floppy-disk"></i> Guardar Préstamo</button>
+                            <button type="button" id="clear-form" class="btn btn--secondary"><i class="ph ph-eraser"></i> Limpiar</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Registros Pendientes</h2>
+                    <input type="text" id="search-input" class="search-input" placeholder="Filtrar registros...">
+                </div>
+                <div class="card-body">
+                    <div class="export-actions">
+                        <span>Exportar Historial Completo:</span>
+                        <div class="export-buttons">
+                             <a href="/export/excel" class="btn btn--subtle"><i class="ph ph-file-xls"></i> Excel</a>
+                             <a href="/export/pdf" class="btn btn--subtle"><i class="ph ph-file-pdf"></i> PDF</a>
                         </div>
                     </div>
-                    <label><input type="checkbox" name="equipos" id="kit"> Kit</label>
-                    <label><input type="checkbox" name="equipos" id="aire"> Aire</label>
-                    <label><input type="checkbox" name="equipos" id="cabinas"> Cabinas</label>
-                    <label><input type="checkbox" name="equipos" id="consola"> Consola</label>
-                    <label><input type="checkbox" name="equipos" id="vbeam"> VBeam</label>
-                </fieldset>
-
-                <div class="form-group full-width">
-                    <label for="observaciones">Observaciones</label>
-                    <textarea id="observaciones" rows="3"></textarea>
+                    <div class="table-wrapper">
+                        <table class="table" id="registros-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Fecha</th>
+                                    <th>Nombre</th>
+                                    <th>Ubicación</th>
+                                    <th>Hora Inicio</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
                 </div>
-
-                <div class="form-actions">
-                    <button type="submit">Guardar Préstamo</button>
-                    <button type="button" id="clear-form">Limpiar</button>
-                </div>
-            </form>
-        </section>
-
-        <section class="table-container">
-            <h2>Registros Pendientes de Devolución</h2>
-            <div class="controls-bar">
-                <input type="text" id="search-input" placeholder="Buscar en la tabla...">
-                <div class="export-buttons">
-                    <a href="/export/excel" class="btn-export">Exportar Historial (Excel)</a>
-                    <a href="/export/pdf" class="btn-export">Exportar Historial (PDF)</a>
-                </div>
-            </div>
-            <div class="table-wrapper">
-                <table id="registros-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Fecha</th>
-                            <th>Nombre</th>
-                            <th>Ubicación</th>
-                            <th>Hora Inicio</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Las filas se insertarán aquí con JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
-    </main>
+            </section>
+        </main>
+    </div>
 
     <!-- Modal para Devoluciones -->
     <div id="devolucion-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <h3>Registrar Devolución</h3>
-            <p>Seleccione quién recibe el equipo.</p>
-            <div class="form-group">
-                <label for="modal-recibido-por">Recibido por*</label>
-                <select id="modal-recibido-por" required></select>
+        <div class="modal-content card">
+             <div class="card-header">
+                <h3 class="card-title">Registrar Devolución</h3>
+                <button id="modal-btn-close" class="btn-icon"><i class="ph ph-x"></i></button>
             </div>
-            <div class="modal-actions">
-                <button id="modal-btn-cancelar" class="btn-secondary">Cancelar</button>
-                <button id="modal-btn-confirmar" class="btn-primary">Confirmar Devolución</button>
+            <div class="card-body">
+                <p>Confirme la persona que recibe los equipos para finalizar el préstamo.</p>
+                <div class="form-group">
+                    <label for="modal-recibido-por">Recibido por</label>
+                    <select id="modal-recibido-por" required></select>
+                </div>
+                <div class="modal-actions">
+                    <button id="modal-btn-cancelar" class="btn btn--secondary">Cancelar</button>
+                    <button id="modal-btn-confirmar" class="btn btn--primary">Confirmar Devolución</button>
+                </div>
             </div>
         </div>
     </div>
