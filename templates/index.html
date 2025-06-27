@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Meta tag para el token CSRF -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Sistema de Gestión de Préstamos</title>
 
     <!-- Tipografía Profesional: Inter -->
@@ -20,7 +22,7 @@
     <div class="container">
         <header class="main-header">
             <i class="ph-bold ph-stack"></i>
-            <h1>Sistema de Gestión de Préstamos</h1>
+            <h1>Gestión de Préstamos</h1>
         </header>
 
         <main>
@@ -29,7 +31,7 @@
                     <h2 class="card-title">Nuevo Préstamo</h2>
                 </div>
                 <div class="card-body">
-                    <form id="prestamo-form">
+                    <form id="prestamo-form" autocomplete="off">
                         <div class="form-grid">
                             <div class="form-group">
                                 <label for="fecha">Fecha</label>
