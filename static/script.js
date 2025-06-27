@@ -142,7 +142,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // <<< MODIFICADO: Capturar el valor de "pertenece" del PC
         let pcPertenece = null;
         if (pcCheckbox.checked && pcNumeroSelect.value) {
             const selectedId = parseInt(pcNumeroSelect.value, 10);
@@ -164,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
             observaciones: document.getElementById('observaciones').value,
             pc: pcCheckbox.checked,
             pc_numero: pcCheckbox.checked ? pcNumeroSelect.value : null,
-            pc_pertenece: pcPertenece, // <-- Se añade el nuevo dato
+            pc_pertenece: pcPertenece,
             kit: document.getElementById('kit').checked,
             aire: document.getElementById('aire').checked,
             cabinas: document.getElementById('cabinas').checked,
