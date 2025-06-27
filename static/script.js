@@ -18,10 +18,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalRecibidoPor = document.getElementById('modal-recibido-por');
     const btnModalCancelar = document.getElementById('modal-btn-cancelar');
     const btnModalConfirmar = document.getElementById('modal-btn-confirmar');
+    const btnModalClose = document.getElementById('modal-btn-close');
 
     let initialData = { usuarios: [], ubicaciones: [], auxiliares: [] };
     let equipmentData = [];
     let prestamoIdParaDevolver = null;
+
+    // --- SEGURIDAD: Obtener el token CSRF de la meta etiqueta ---
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
     // --- FUNCIONES ---
     async function cargarDatosIniciales() {
@@ -30,10 +34,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 fetch('/api/initial-data'),
                 fetch('/api/equipos')
             ]);
+            if (!initialResponse.ok || !equiposResponse.ok) throw new Error('Error de red al cargar datos.');
 
             initialData = await initialResponse.json();
             equipmentData = await equiposResponse.json();
 
+            // Poblar datalist de usuarios
             userDatalist.innerHTML = '';
             initialData.usuarios.forEach(u => {
                 const option = document.createElement('option');
@@ -41,6 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 userDatalist.appendChild(option);
             });
 
+            // Poblar select de ubicaciones
             selectUbicacion.innerHTML = '<option value="">Seleccione...</option>';
             initialData.ubicaciones.forEach(u => {
                 const option = document.createElement('option');
@@ -50,11 +57,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 selectUbicacion.appendChild(option);
             });
 
+            // Poblar select de equipos (PC)
             pcNumeroSelect.innerHTML = '<option value="">Nº</option>';
             equipmentData.forEach(eq => {
                 pcNumeroSelect.innerHTML += `<option value="${eq.id}">${eq.id}</option>`;
             });
 
+            // Función para poblar selects de auxiliares
             const poblarSelectAuxiliares = (selectElement) => {
                 selectElement.innerHTML = '<option value="">Seleccione...</option>';
                 initialData.auxiliares.forEach(a => {
@@ -76,39 +85,60 @@ document.addEventListener('DOMContentLoaded', () => {
     async function cargarRegistros() {
         try {
             const response = await fetch('/api/prestamos');
+            if (!response.ok) throw new Error('Error al obtener los préstamos');
             const prestamos = await response.json();
             renderTabla(prestamos);
         } catch (error) {
             console.error('Error al cargar registros:', error);
         }
     }
-
+    
+    // *** FUNCIÓN SEGURA PARA RENDERIZAR LA TABLA (Anti-XSS) ***
     function renderTabla(prestamos) {
-        registrosTbody.innerHTML = '';
+        registrosTbody.innerHTML = ''; // Limpiar tabla
         if (prestamos.length === 0) {
-            registrosTbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No hay préstamos pendientes.</td></tr>';
+            const tr = registrosTbody.insertRow();
+            const td = tr.insertCell();
+            td.colSpan = 7;
+            td.textContent = 'No hay préstamos pendientes.';
+            td.style.textAlign = 'center';
             return;
         }
+
         prestamos.forEach(p => {
-            const tr = document.createElement('tr');
+            const tr = registrosTbody.insertRow();
+            
+            // Crear celdas de forma segura
             const ubicacionInfo = p.pc && p.pc_numero ? `${p.ubicacion} (PC: ${p.pc_numero})` : p.ubicacion;
-            tr.innerHTML = `
-                <td>${p.id}</td>
-                <td>${p.fecha}</td>
-                <td>${p.nombre}</td>
-                <td>${ubicacionInfo}</td>
-                <td>${p.hora_inicio}</td>
-                <td><span class="status-pendiente">Pendiente</span></td>
-                <td><button class="btn-devolver" data-id="${p.id}">Devolver</button></td>
-            `;
-            registrosTbody.appendChild(tr);
+
+            tr.insertCell().textContent = p.id;
+            tr.insertCell().textContent = p.fecha;
+            tr.insertCell().textContent = p.nombre;
+            tr.insertCell().textContent = ubicacionInfo;
+            tr.insertCell().textContent = p.hora_inicio;
+
+            // Celda de estado
+            const statusCell = tr.insertCell();
+            const statusSpan = document.createElement('span');
+            statusSpan.className = 'status-pendiente';
+            statusSpan.textContent = 'Pendiente';
+            statusCell.appendChild(statusSpan);
+
+            // Celda de acciones
+            const actionCell = tr.insertCell();
+            const devolverBtn = document.createElement('button');
+            devolverBtn.className = 'btn-devolver';
+            devolverBtn.textContent = 'Devolver';
+            devolverBtn.dataset.id = p.id;
+            actionCell.appendChild(devolverBtn);
         });
     }
 
     function limpiarFormulario() {
         form.reset();
         document.getElementById('fecha').valueAsDate = new Date();
-        document.getElementById('hora_inicio').value = new Date().toTimeString().slice(0, 5);
+        const now = new Date();
+        document.getElementById('hora_inicio').value = now.toTimeString().slice(0, 5);
         inputIdentificacion.value = '';
         inputArea.value = '';
         inputEdificio.value = '';
@@ -146,9 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (pcCheckbox.checked && pcNumeroSelect.value) {
             const selectedId = parseInt(pcNumeroSelect.value, 10);
             const equipo = equipmentData.find(eq => eq.id === selectedId);
-            if (equipo) {
-                pcPertenece = equipo.pertenece;
-            }
+            if (equipo) pcPertenece = equipo.pertenece;
         }
 
         const formData = {
@@ -178,7 +206,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch('/api/prestamos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
+            const response = await fetch('/api/prestamos', { 
+                method: 'POST', 
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken // *** SEGURIDAD: Enviar token CSRF ***
+                }, 
+                body: JSON.stringify(formData) 
+            });
             const result = await response.json();
             if (!response.ok) throw new Error(result.error || 'Error desconocido');
             alert(result.success);
@@ -193,11 +228,12 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput.addEventListener('keyup', () => {
         const searchTerm = searchInput.value.toLowerCase();
         registrosTbody.querySelectorAll('tr').forEach(row => {
-            row.style.display = row.textContent.toLowerCase().includes(searchTerm) ? '' : 'none';
+            const rowText = row.textContent.toLowerCase();
+            row.style.display = rowText.includes(searchTerm) ? '' : 'none';
         });
     });
 
-    // --- Modal Logic ---
+    // --- Lógica del Modal ---
     registrosTbody.addEventListener('click', (e) => {
         if (e.target.classList.contains('btn-devolver')) {
             prestamoIdParaDevolver = e.target.dataset.id;
@@ -205,11 +241,14 @@ document.addEventListener('DOMContentLoaded', () => {
             devolucionModal.classList.remove('hidden');
         }
     });
-
-    btnModalCancelar.addEventListener('click', () => {
+    
+    const closeModal = () => {
         devolucionModal.classList.add('hidden');
         prestamoIdParaDevolver = null;
-    });
+    };
+    
+    btnModalCancelar.addEventListener('click', closeModal);
+    btnModalClose.addEventListener('click', closeModal);
 
     btnModalConfirmar.addEventListener('click', async () => {
         const recibidoPor = modalRecibidoPor.value;
@@ -218,11 +257,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         try {
-            const response = await fetch(`/api/prestamos/${prestamoIdParaDevolver}/devolver`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ recibido_por: recibidoPor }) });
+            const response = await fetch(`/api/prestamos/${prestamoIdParaDevolver}/devolver`, { 
+                method: 'POST', 
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken // *** SEGURIDAD: Enviar token CSRF ***
+                }, 
+                body: JSON.stringify({ recibido_por: recibidoPor }) 
+            });
             const result = await response.json();
             if (!response.ok) throw new Error(result.error);
             alert(result.success);
-            devolucionModal.classList.add('hidden');
+            closeModal();
             cargarRegistros();
         } catch (error) {
             console.error('Error al registrar devolución:', error);
